@@ -19,7 +19,12 @@ app.use(requestLogger);
 app.use(express.json());
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 
-// Mount routes under /_/backend prefix (Vercel rewrites strip this prefix)
+// Strip /_/backend prefix that Vercel passes through to the function
+app.use((req, _res, next) => {
+    req.url = req.url.replace(/^\/_\/backend/, "") || "/";
+    next();
+});
+
 app.use("/auth", authRoutes);
 app.use("/thoughts", thoughtRoutes);
 
