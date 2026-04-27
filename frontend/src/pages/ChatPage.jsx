@@ -218,7 +218,7 @@ export default function ChatPage() {
             ← Thoughts
           </Link>
           <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--ds-text, #24303a)' }}>
-            Happy Chat
+            Happy Thoughts Chat
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: isConnected ? '#2ec8a8' : '#aaa' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: isConnected ? '#2ec8a8' : '#aaa', display: 'inline-block' }} />

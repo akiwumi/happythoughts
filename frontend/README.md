@@ -1,4 +1,4 @@
-# MERN Chat Frontend
+# Happy Thoughts Frontend
 
 A full-featured React chat application with authentication, real-time messaging via Socket.IO, and a polished design system.
 
