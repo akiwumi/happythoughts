@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState, useCallback } from 'react'
 import { io } from 'socket.io-client'
-import { SOCKET_URL } from '../config/constants'
+import { SOCKET_URL, SOCKET_PATH } from '../config/constants'
 import { useAuth } from '../hooks/useAuth'
 
 export const SocketContext = createContext()
@@ -21,6 +21,7 @@ export function SocketProvider({ children }) {
     }
 
     const newSocket = io(SOCKET_URL, {
+      path: SOCKET_PATH,
       auth: {
         token,
         userId: user._id,

@@ -34,6 +34,7 @@ app.use(cors({ origin: allowedOrigins, credentials: true }));
 const server = http.createServer(app);
 
 const io = new Server(server, {
+    path: "/_/backend/socket.io",
     cors: { origin: allowedOrigins, credentials: true },
 });
 
