@@ -1,7 +1,14 @@
-import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()]
+  plugins: [react()],
+  root: '.',
+  server: {
+    proxy: {
+      '/auth': 'http://localhost:3001',
+      '/thoughts': 'http://localhost:3001',
+      '/messages': 'http://localhost:3001',
+    },
+  },
 })

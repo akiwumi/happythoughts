@@ -8,6 +8,15 @@ export interface UserProps extends Document {
     avatar?: string;
 }
 
+export interface ThoughtProps extends Document {
+    _id: Types.ObjectId;
+    message: string;
+    author: Types.ObjectId;
+    likes: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 export interface ConversationProps extends Document {
     _id: Types.ObjectId;
     type: "direct" | "group";

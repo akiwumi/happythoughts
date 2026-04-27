@@ -1,91 +1,83 @@
-// API Configuration
-// Using mock API for development (stores data in localStorage)
-// To switch back to real API, set USE_MOCK_API to false and update API_URL
-import { mockApi } from './mockApi.js'
+import api from '../app/config/axios'
+import { API_ENDPOINTS } from '../app/config/constants'
+import { tokenStorage } from '../app/utils/tokenStorage.js'
 
-const USE_MOCK_API = false // Set to false to use real API
-const API_URL = 'https://happy-thoughts-api-4ful.onrender.com/thoughts'
+export const authService = {
+  register: async (name, email, password) => {
+    const res = await api.post(API_ENDPOINTS.AUTH_REGISTER, { name, email, password })
+    return res.data
+  },
 
-// Real API implementation
-const handleResponse = async (response) => {
-  if (!response.ok) {
-    let errorMessage = 'Something went wrong'
+  login: async (email, password) => {
+    const res = await api.post(API_ENDPOINTS.AUTH_LOGIN, { email, password })
+    const { token, user } = res.data
+    if (token) tokenStorage.setToken(token)
+    if (user) tokenStorage.setUser(user)
+    return res.data
+  },
+
+  logout: async () => {
     try {
-      const data = await response.json()
-      errorMessage = data.errors?.message || data.message || errorMessage
-    } catch {
-      errorMessage = `Server error: ${response.status} ${response.statusText}`
+      await api.post(API_ENDPOINTS.AUTH_LOGOUT)
+    } finally {
+      tokenStorage.clearAuth()
     }
-    throw new Error(errorMessage)
-  }
-  return response.json()
+  },
+
+  getMe: async () => {
+    const res = await api.get(API_ENDPOINTS.AUTH_ME)
+    if (res.data?.user) tokenStorage.setUser(res.data.user)
+    return res.data
+  },
 }
 
-const fetchThoughtsReal = async () => {
-  try {
-    const response = await fetch(API_URL)
-    return await handleResponse(response)
-  } catch (err) {
-    if (err.name === 'TypeError' && err.message.includes('fetch')) {
-      throw new Error('Network error: Unable to connect to the server. Please check your internet connection.')
-    }
-    throw err
-  }
+export const thoughtsService = {
+  // Get all thoughts (public)
+  getThoughts: async () => {
+    const res = await api.get(API_ENDPOINTS.THOUGHTS)
+    return res.data
+  },
+
+  // Create a new thought (requires authentication)
+  createThought: async (message) => {
+    const res = await api.post(API_ENDPOINTS.THOUGHTS, { message })
+    return res.data
+  },
+
+  // Edit a thought (requires authentication + author only)
+  editThought: async (id, message) => {
+    const res = await api.put(API_ENDPOINTS.THOUGHTS_BY_ID(id), { message })
+    return res.data
+  },
+
+  // Delete a thought (requires authentication + author only)
+  deleteThought: async (id) => {
+    const res = await api.delete(API_ENDPOINTS.THOUGHTS_BY_ID(id))
+    return res.data
+  },
+
+  // Like a thought (public)
+  likeThought: async (id) => {
+    const res = await api.post(API_ENDPOINTS.LIKE_THOUGHT(id))
+    return res.data
+  },
 }
 
-const postThoughtReal = async (message) => {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message }),
-    })
-
-    return await handleResponse(response)
-  } catch (err) {
-    if (err.name === 'TypeError' && err.message.includes('fetch')) {
-      throw new Error('Network error: Unable to connect to the server. Please check your internet connection.')
-    }
-    throw err
-  }
+export const messagesService = {
+  getAll: async () => {
+    const res = await api.get(API_ENDPOINTS.MESSAGES)
+    return res.data
+  },
+  send: async (text) => {
+    const res = await api.post(API_ENDPOINTS.MESSAGES, { text })
+    return res.data
+  },
+  edit: async (id, text) => {
+    const res = await api.put(`${API_ENDPOINTS.MESSAGES}/${id}`, { text })
+    return res.data
+  },
+  remove: async (id) => {
+    const res = await api.delete(`${API_ENDPOINTS.MESSAGES}/${id}`)
+    return res.data
+  },
 }
-
-const likeThoughtReal = async (thoughtId) => {
-  try {
-    const response = await fetch(`${API_URL}/${thoughtId}/like`, {
-      method: 'POST',
-    })
-
-    return await handleResponse(response)
-  } catch (err) {
-    if (err.name === 'TypeError' && err.message.includes('fetch')) {
-      throw new Error('Network error: Unable to like thought. Please check your internet connection.')
-    }
-    throw err
-  }
-}
-
-// Export functions that use either mock or real API
-export const fetchThoughts = USE_MOCK_API
-  ? () => mockApi.fetchThoughts()
-  : fetchThoughtsReal
-
-export const postThought = USE_MOCK_API
-  ? (message) => {
-      try {
-        return mockApi.postThought(message)
-      } catch (err) {
-        // Format error to match real API error structure
-        const error = new Error(err.errors?.message || err.message || 'Failed to post thought')
-        error.errors = err.errors
-        throw error
-      }
-    }
-  : postThoughtReal
-
-export const likeThought = USE_MOCK_API
-  ? (thoughtId) => mockApi.likeThought(thoughtId)
-  : likeThoughtReal
-
