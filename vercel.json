@@ -7,14 +7,9 @@
       "includeFiles": "backend/**"
     }
   },
-  "rewrites": [
-    {
-      "source": "/_/backend/:path*",
-      "destination": "/backend/api.ts"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+  "routes": [
+    { "src": "/_/backend/(.*)", "dest": "/backend/api.ts" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
