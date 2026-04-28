@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../app/hooks/useAuth'
 import { useToast } from '../app/hooks/useToast'
@@ -139,20 +139,21 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Real-time: new message from any user
-  useSocketEvent('message:new', (msg) => {
+  const onNewMessage = useCallback((msg) => {
     setMessages((prev) => prev.some((m) => m._id === msg._id) ? prev : [...prev, msg])
-  })
+  }, [])
 
-  // Real-time: message edited by any user
-  useSocketEvent('message:updated', (msg) => {
+  const onMessageUpdated = useCallback((msg) => {
     setMessages((prev) => prev.map((m) => m._id === msg._id ? msg : m))
-  })
+  }, [])
 
-  // Real-time: message deleted by any user
-  useSocketEvent('message:deleted', ({ id }) => {
+  const onMessageDeleted = useCallback(({ id }) => {
     setMessages((prev) => prev.filter((m) => m._id !== id))
-  })
+  }, [])
+
+  useSocketEvent('message:new', onNewMessage)
+  useSocketEvent('message:updated', onMessageUpdated)
+  useSocketEvent('message:deleted', onMessageDeleted)
 
   const fetchMessages = async () => {
     try {

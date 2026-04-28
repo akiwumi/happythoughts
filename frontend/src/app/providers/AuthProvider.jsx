@@ -1,5 +1,6 @@
 import React, { createContext, useReducer, useEffect } from 'react'
 import { authService } from '../../services/api'
+import { tokenStorage } from '../utils/tokenStorage.js'
 
 export const AuthContext = createContext()
 
@@ -58,9 +59,9 @@ export function AuthProvider({ children }) {
   // Hydrate on mount
   useEffect(() => {
     const hydrateAuth = async () => {
-      const token = localStorage.getItem('token')
-      const user = localStorage.getItem('user')
-      
+      const token = tokenStorage.getToken()
+      const user = tokenStorage.getUser()
+
       if (token && user) {
         try {
           const res = await authService.getMe()
@@ -69,8 +70,7 @@ export function AuthProvider({ children }) {
             payload: { user: res.user, token },
           })
         } catch {
-          localStorage.removeItem('token')
-          localStorage.removeItem('user')
+          tokenStorage.clearAuth()
           dispatch({ type: 'HYDRATE', payload: { user: null, token: null } })
         }
       } else {
